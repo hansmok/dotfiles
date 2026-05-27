@@ -1,0 +1,14 @@
+# Ignore secret history files that might contain passwords/API keys
+.zsh_history
+.bash_history
+
+# Ignore private keys and certificates if you accidentally put them here
+*.pem
+*.key
+id_rsa
+id_ed25519
+
+# Ignore system/editor leftovers
+.DS_Store
+.cache/
+*.swp

@@ -1,0 +1,107 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[$username\
+$hostname](bg:#a3aed2 fg:#090c0c)\
+[░▒▓](#a3aed2)\
+[ $os ](bg:#a3aed2 fg:#090c0c)\
+[](bg:#769ff0 fg:#a3aed2)\
+$directory\
+[](fg:#769ff0 bg:#394260)\
+$git_branch\
+$git_status\
+[](fg:#394260 bg:#212736)\
+$nodejs\
+$bun\
+$rust\
+$golang\
+$php\
+[](fg:#212736 bg:#1d2230)\
+$time\
+[ ](fg:#1d2230)\
+$character"""
+
+# Custom Identity Block (gawain@camelot)
+# -----------------------------------------------------------------------------
+[username]
+show_always = true
+style_user = "bg:#a3aed2 fg:#090c0c bold"
+style_root = "bg:#a3aed2 fg:#ff0000 bold"
+format = " $user" # Left padding space
+
+[hostname]
+ssh_only = false
+style = "bg:#a3aed2 fg:#090c0c bold"
+format = "@$hostname " # Right padding space
+
+# -----------------------------------------------------------------------------
+# Prompt Input Line Symbol (λ)
+# -----------------------------------------------------------------------------
+[character]
+success_symbol = "[λ](bold #73daca) " # Cyan lambda on success
+error_symbol = "[λ](bold #f7768e) "   # Red lambda on error
+
+[os]
+disabled = false
+style = "bg:#a3aed2 fg:#090c0c bold"
+format = "[$symbol]($style)"
+
+[os.symbols]
+Linux = " "    # This will display the Tux Linux penguin
+Arch = " "        # Displays the Arch Linux logo on your machine
+Ubuntu = " "   # If you use Ubuntu, it will show the Ubuntu logo
+Macos = " "    # It will still show the Apple icon if you boot into a Mac
+Unknown = " "     # Falls back to the Tux Penguin if it can't detect the OS
+
+[directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#394260"
+format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
+
+[git_status]
+style = "bg:#394260"
+format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
+
+[nodejs]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[bun]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[rust]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[golang]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[php]
+symbol = ""
+style = "bg:#212736"
+format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
+
+[time]
+disabled = false
+time_format = "%R" # Hour:Minute Format
+style = "bg:#1d2230"
+format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
