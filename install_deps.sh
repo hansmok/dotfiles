@@ -39,8 +39,7 @@ if [ "$OS" == "macOS" ]; then
     brew update
 
     echo "⚙️ Installing core dependencies via Homebrew..."
-    # Core packages, compilers for tree-sitter, and tools
-    brew install neovim kitty zsh starship gcc git curl unzip ripgrep fd fd-find
+    brew install neovim kitty zsh starship gcc git curl unzip ripgrep fd fd-find stow
     
 elif [ "$OS" == "Linux" ]; then
     case "$DISTRO" in
@@ -49,8 +48,7 @@ elif [ "$OS" == "Linux" ]; then
             sudo apt-get update -y
             
             echo "⚙️ Installing core dependencies via apt..."
-            # build-essential provides gcc/g++ required by treesitter compilation
-            sudo apt-get install -y neovim kitty zsh git curl unzip ripgrep fd-find build-essential
+            sudo apt-get install -y neovim kitty zsh git curl unzip ripgrep fd-find build-essential stow
             ;;
             
         arch|manjaro)
@@ -58,8 +56,7 @@ elif [ "$OS" == "Linux" ]; then
             sudo pacman -Syu --noconfirm
             
             echo "⚙️ Installing core dependencies via pacman..."
-            # base-devel provides compilers for treesitter
-            sudo pacman -S --noconfirm neovim kitty zsh starship git curl unzip ripgrep fd base-devel
+            sudo pacman -S --noconfirm neovim kitty zsh starship git curl unzip ripgrep fd base-devel stow
             ;;
             
         fedora|rhel|centos)
@@ -67,29 +64,23 @@ elif [ "$OS" == "Linux" ]; then
             sudo dnf check-update || true
             
             echo "⚙️ Installing core dependencies via dnf..."
-            # Development Tools provides gcc/g++ compilers for treesitter
             sudo dnf groupinstall -y "Development Tools"
-            sudo dnf install -y neovim kitty zsh git curl unzip ripgrep fd-find
+            sudo dnf install -y neovim kitty zsh git curl unzip ripgrep fd-find stow
             ;;
             
         *)
             echo "❌ Linux distribution '$DISTRO' is not explicitly supported by this script."
-            echo "Please install neovim, kitty, zsh, starship, ripgrep, fd, and a C-compiler manually."
+            echo "Please install dependencies manually."
             exit 1
             ;;
     esac
 
-    # Linux standalone installation hook for Starship (since Debian/Ubuntu/Fedora apt repositories lag behind)
+    # Linux standalone installation hook for Starship (if distro repositories lag behind)
     if ! command -v starship &> /dev/null; then
         echo "⭐ Installing Starship prompt standalone..."
         curl -sS https://starship.rs/install.sh | sh -s -- -y
     fi
 fi
-
-# ---------------------------------------------------------------------
-# 3. Post-Install Configurations & Health Checks
-# ---------------------------------------------------------------------
-echo "✅ Essential packages installed successfully."
 
 # Ensure standard utilities like fd map correctly regardless of distro naming conventions
 if [ "$OS" == "Linux" ] && [ ! -x "$(command -v fd)" ] && [ -x "$(command -v fdfind)" ]; then
@@ -98,16 +89,42 @@ if [ "$OS" == "Linux" ] && [ ! -x "$(command -v fd)" ] && [ -x "$(command -v fdf
     ln -sf "$(which fdfind)" "$HOME/.local/bin/fd"
 fi
 
-# Automatically change default system shell to Zsh if it isn't already
+# ---------------------------------------------------------------------
+# 3. AUTOMATED CONFIG MAPPING (Stow Sequence)
+# ---------------------------------------------------------------------
+echo "📦 Mapping configuration files with GNU Stow..."
+
+# Ensure core target directories exist before linking
+mkdir -p "$HOME/.config"
+
+# Navigate into the dotfiles directory so the relative paths match perfectly
+DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$DOTFILES_DIR"
+
+# 1. Map kitty and starship (They already contain .config/ inside them)
+stow kitty
+stow starship
+
+# 2. Map your shell files (.zshrc and .bashrc directly to your home folder)
+stow shell
+
+# 3. Map nvim (Explicitly target ~/.config/nvim since init.lua sits at its root)
+mkdir -p "$HOME/.config/nvim"
+stow -t "$HOME/.config/nvim" nvim
+
+echo "✨ Configuration symlinks successfully created!"
+
+# ---------------------------------------------------------------------
+# 4. Post-Install Shell Adjustments
+# ---------------------------------------------------------------------
 CURRENT_SHELL=$(basename "$SHELL")
 if [ "$CURRENT_SHELL" != "zsh" ]; then
     echo "🐚 Changing your default shell to Zsh (requires password evaluation)..."
     ZSH_PATH=$(which zsh)
-    # Check if zsh path is listed in valid shells file, add if missing on Linux
     if [ "$OS" == "Linux" ] && ! grep -q "$ZSH_PATH" /etc/shells; then
         echo "$ZSH_PATH" | sudo tee -a /etc/shells
     fi
     chsh -s "$ZSH_PATH"
 fi
 
-echo "🎉 Setup complete! Restart your terminal or system to load into your unified environment."
+echo "🎉 Setup complete! All packages are installed and your configuration links are fully active."
